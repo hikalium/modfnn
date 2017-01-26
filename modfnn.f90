@@ -1,4 +1,5 @@
 module modfnn
+  use iso_fortran_env
   implicit none
   type matptr
     real(8), dimension(:, :), pointer :: p
@@ -6,6 +7,8 @@ module modfnn
   interface disp
     module procedure disp_m
     module procedure disp_r
+    module procedure disp_u8
+    module procedure disp_u32
   end interface 
 contains
   function relu(x) result(r)
@@ -21,6 +24,14 @@ contains
   end subroutine
   subroutine disp_r(r)
     real(8) r
+    write(*, *) r
+  end subroutine
+  subroutine disp_u8(r)
+    integer (int8) r
+    write(*, *) r
+  end subroutine
+  subroutine disp_u32(r)
+    integer (int32) r
     write(*, *) r
   end subroutine
   subroutine tic(t1)

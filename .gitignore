@@ -1,4 +1,6 @@
+.DS_Store
 *.swp
 *.mod
 *.smod
 a.out
+data/*
