@@ -1,17 +1,5 @@
 module modfnn
   implicit none
-  interface sigmoid
-    module function sigmoidr(m) result(r)
-      real(8), intent(in) :: m
-      real(8) :: r
-    end function
-
-    module function sigmoidm(m) result(r)
-      integer :: xs, ys
-      real(8), intent(in) :: m(ys, xs)
-      real(8) :: r(ys, xs)
-    end function
-  end interface
 contains
   function relu(x) result(r)
     real(8) :: x, r
@@ -40,20 +28,24 @@ contains
     write(*,*) "Time = ", diff/dble(t_rate)
     t1 = diff
   end subroutine toc
-  function sigmoidr(m) result(r)
+  function sigmoid(m) result(r)
     real(8), intent(in) :: m
     real(8) :: r
     r = 1d0 / (1d0 + exp(-m))
   end function
-  function sigmoidm(m, xs, ys) result(r)
-    integer :: xs, ys
-    real(8), intent(in) :: m(ys, xs)
-    real(8) :: r(ys, xs)
+  function sigmoid_m(m) result(r)
+    real(8), intent(in) :: m(:, :)
     !
     integer :: y, x
+    integer :: xs, ys
+    real(8), allocatable :: r(:, :)
+    !
+    xs = size(m, 2)
+    ys = size(m, 1)
+    allocate(r(ys, xs))
     do y = 1, size(m, 1)
       do x = 1, size(m, 2)
-        r(y, x) = sigmoidr(m(y, x))
+        r(y, x) = sigmoid(m(y, x))
       end do 
     end do    
   end function

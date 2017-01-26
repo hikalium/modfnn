@@ -11,6 +11,6 @@ program main
   call disp(W1) 
   call disp(B1) 
 
-  call disp(sigmoid(matmul(X, W1) + B1, size(B1, 2), size(B1, 1)))
+  call disp(sigmoid_m(matmul(X, W1) + B1))
 
 end program
