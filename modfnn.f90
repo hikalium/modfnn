@@ -1,5 +1,8 @@
 module modfnn
   implicit none
+  type matptr
+    real(8), dimension(:, :), pointer :: p
+  end type 
 contains
   function relu(x) result(r)
     real(8) :: x, r
@@ -34,6 +37,7 @@ contains
     r = 1d0 / (1d0 + exp(-m))
   end function
   function sigmoid_m(m) result(r)
+    ! 新たにallocして返す。
     real(8), intent(in) :: m(:, :)
     !
     integer :: y, x
