@@ -2,18 +2,26 @@ module modfnn
   implicit none
   type matptr
     real(8), dimension(:, :), pointer :: p
-  end type 
+  end type
+  interface disp
+    module procedure disp_m
+    module procedure disp_r
+  end interface 
 contains
   function relu(x) result(r)
     real(8) :: x, r
     r = max(x, 0d0)
   end function
-  subroutine disp(mat)
+  subroutine disp_m(mat)
     real(8) mat(:, :)
     integer i
     do i = 1, size(mat, 1)
       write(*, "(100e12.4)") mat(i, 1:)
     end do
+  end subroutine
+  subroutine disp_r(r)
+    real(8) r
+    write(*, *) r
   end subroutine
   subroutine tic(t1)
     integer, intent(inout) :: t1
@@ -47,9 +55,42 @@ contains
     xs = size(m, 2)
     ys = size(m, 1)
     allocate(r(ys, xs))
-    do y = 1, size(m, 1)
-      do x = 1, size(m, 2)
+    do y = 1, ys
+      do x = 1, xs
         r(y, x) = sigmoid(m(y, x))
+      end do 
+    end do    
+  end function
+  function softmax_m(m) result(r)
+    ! 新たにallocして返す。
+    real(8), intent(in) :: m(:, :)
+    !
+    integer :: y, x
+    integer :: xs, ys
+    real(8), allocatable :: r(:, :)
+    real(8) :: vs
+    !
+    xs = size(m, 2)
+    ys = size(m, 1)
+    allocate(r(ys, xs))
+    r = m
+    ! オーバーフロー対策
+    vs = maxval(r)
+    do y = 1, ys
+      do x = 1, xs
+        r(y, x) = r(y, x) - vs
+      end do 
+    end do
+    ! 本来の計算
+    do y = 1, ys
+      do x = 1, xs
+        r(y, x) = exp(r(y, x))
+      end do 
+    end do
+    vs = sum(r)
+    do y = 1, ys
+      do x = 1, xs
+        r(y, x) = r(y, x) / vs
       end do 
     end do    
   end function

@@ -3,6 +3,7 @@ program main
   implicit none
 
   real(8) :: X(1, 2) = reshape((/ 1.0, 0.5 /), (/1, 2/))
+  real(8) :: Y(1, 3) = reshape((/ 0.3d0, 2.9d0, 4.0d0 /), (/1, 3/))
   type(matptr) :: W(3)
   type(matptr) :: b(3)
   real(8), allocatable :: tmp(:, :)
@@ -29,5 +30,7 @@ program main
   tmp = matmul(tmp, W(3)%p) + b(3)%p
 
   call disp(tmp)
+  call disp(softmax_m(Y))
+  call disp(sum(softmax_m(Y)))
 
 end program
