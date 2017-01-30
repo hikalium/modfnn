@@ -105,5 +105,20 @@ contains
       end do 
     end do    
   end function
+  function mean_squared_error(v, t) result(rv)
+    ! 新たにallocして返す。
+    real(8), intent(in) :: v(:)
+    real(8), intent(in) :: t(:)
+    !
+    integer :: i, cnt
+    real(8), allocatable :: r(:)
+    real(8) :: rv
+    !
+    cnt = size(v, 1)
+    allocate(r(cnt))
+    r = v - t
+    r = r * r
+    rv = sum(r) * 0.5d0
+  end function
 end module
 

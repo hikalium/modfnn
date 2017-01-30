@@ -5,6 +5,8 @@ program main
 
   real(8) :: X(1, 2) = reshape((/ 1.0, 0.5 /), (/1, 2/))
   real(8) :: Y(1, 3) = reshape((/ 0.3d0, 2.9d0, 4.0d0 /), (/1, 3/))
+  real(8) :: t(10, 1) = reshape((/ 0d0, 0d0, 1d0, 0d0, 0d0, 0d0, 0d0, 0d0, 0d0, 0d0 /), (/10, 1/))
+  real(8) :: s(10, 1) = reshape((/ 0.1d0, 0.05d0, 0.6d0, 0.0d0, 0.05d0, 0.1d0, 0.0d0, 0.1d0, 0d0, 0d0 /), (/10, 1/))
   type(matptr) :: W(3)
   type(matptr) :: b(3)
   real(8), allocatable :: tmp(:, :)
@@ -36,7 +38,8 @@ program main
   call disp(softmax_m(Y))
   call disp(sum(softmax_m(Y)))
 
-  call read_MNIST(1000, imgs, labels)
+  ! call read_MNIST(1000, imgs, labels)
+  call disp(mean_squared_error(s(:, 1), t(:, 1)))
 
 contains
   function read_uint8(fp) result(v)
