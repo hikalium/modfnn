@@ -106,7 +106,6 @@ contains
     end do    
   end function
   function mean_squared_error(v, t) result(rv)
-    ! 新たにallocして返す。
     real(8), intent(in) :: v(:)
     real(8), intent(in) :: t(:)
     !
@@ -119,6 +118,15 @@ contains
     r = v - t
     r = r * r
     rv = sum(r) * 0.5d0
+    deallocate(r)
+  end function
+  function cross_entropy_error(v, t) result(rv)
+    real(8), intent(in) :: v(:)
+    real(8), intent(in) :: t(:)
+    !
+    real(8) :: rv, delta = 1d-7
+    !
+    rv = -sum(t * log(v + delta))
   end function
 end module
 

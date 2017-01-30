@@ -40,6 +40,7 @@ program main
 
   ! call read_MNIST(1000, imgs, labels)
   call disp(mean_squared_error(s(:, 1), t(:, 1)))
+  call disp(cross_entropy_error(s(:, 1), t(:, 1)))
 
 contains
   function read_uint8(fp) result(v)
