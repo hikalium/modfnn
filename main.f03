@@ -4,6 +4,7 @@ program main
   implicit none
 
   real(8) :: X(1, 2) = reshape((/ 1.0, 0.5 /), (/1, 2/))
+  real(8) :: m(2, 1) = reshape((/ 0.0, 2.0 /), (/2, 1/))
   real(8) :: Y(1, 3) = reshape((/ 0.3d0, 2.9d0, 4.0d0 /), (/1, 3/))
   real(8) :: t(10, 1) = reshape((/ 0d0, 0d0, 1d0, 0d0, 0d0, 0d0, 0d0, 0d0, 0d0, 0d0 /), (/10, 1/))
   real(8) :: s(10, 1) = reshape((/ 0.1d0, 0.05d0, 0.6d0, 0.0d0, 0.05d0, 0.1d0, 0.0d0, 0.1d0, 0d0, 0d0 /), (/10, 1/))
@@ -12,6 +13,7 @@ program main
   real(8), allocatable :: tmp(:, :)
   type(matptr), allocatable :: imgs(:)
   integer, allocatable :: labels(:)
+  real(8), allocatable :: grad(:, :)
   !
   allocate(W(1)%p(2, 3))
   W(1)%p = reshape((/ 0.1, 0.2, 0.3, 0.4, 0.5, 0.6 /), (/2, 3/))
@@ -41,6 +43,8 @@ program main
   ! call read_MNIST(1000, imgs, labels)
   call disp(mean_squared_error(s(:, 1), t(:, 1)))
   call disp(cross_entropy_error(s(:, 1), t(:, 1)))
+  call numerical_gradient(f2, m, grad)
+  call disp(grad)
 
 contains
   function read_uint8(fp) result(v)
@@ -116,4 +120,9 @@ contains
     end do
       write(*, fmt='()')
   end subroutine
+  function f2(m) result(v)
+    real(8), intent(in) :: m(:, :)
+    real(8) :: v
+    v = sum(m * m)
+  end function
 end program

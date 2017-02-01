@@ -1,4 +1,4 @@
-SRCS = modfnn.f90 main.f90
+SRCS = modfnn.f03 main.f03
 
 ./a.out : $(SRCS) Makefile
 	gfortran $(SRCS)

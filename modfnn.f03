@@ -128,5 +128,37 @@ contains
     !
     rv = -sum(t * log(v + delta))
   end function
+  subroutine numerical_gradient(f, m0, grad)
+    interface
+      real(8) function f(m)
+        real(8), intent(in) :: m(:, :)
+      end function
+    end interface
+    real(8) :: h = 1d-4
+    real(8), allocatable, intent(out) :: grad(:, :)
+    real(8), intent(in) :: m0(:, :)
+    real(8), allocatable:: m(:, :)
+    real(8) :: org_val, fxh1, fxh2
+    integer :: size_x, size_y, x, y
+    allocate(grad(size(m0, 1), size(m0, 2)))
+    allocate(m(size(m0, 1), size(m0, 2)))
+    m = m0
+    size_y = size(m, 1)
+    size_x = size(m, 2)
+    do y = 1, size_y
+      do x = 1, size_x
+        org_val = m(y, x)
+        ! calc f(x + h)
+        m(y, x) = org_val + h
+        fxh1 = f(m)
+        ! calc f(x - h)
+        m(y, x) = org_val - h
+        fxh2 = f(m)
+        ! calc grad
+        grad(y, x) = (fxh1 - fxh2) / (2 * h)
+      end do
+    end do
+    
+  end subroutine
 end module
 
