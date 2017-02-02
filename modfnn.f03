@@ -4,6 +4,11 @@ module modfnn
   type matptr
     real(8), dimension(:, :), pointer :: p
   end type
+  type network
+    type(matptr), allocatable :: W(:)     ! 重み
+    type(matptr), allocatable :: b(:)     ! バイアス
+    integer, allocatable :: layerSize(:)  ! 各レイヤのサイズ
+  end type
   interface disp
     module procedure disp_m
     module procedure disp_r
@@ -33,6 +38,29 @@ contains
   subroutine disp_u32(r)
     integer (int32) r
     write(*, *) r
+  end subroutine
+  subroutine allocRandomMatrix(m, ys, xs)
+    real(8), intent(inout), allocatable :: m(:,:)
+    integer, intent(in) :: ys, xs
+    integer :: c, seedsize
+    integer, allocatable :: seed(:)
+    if (allocated(m)) then
+      deallocate(m)
+    end if
+    allocate(m(ys,xs))
+    call system_clock(count=c)
+    call random_seed(size=seedsize)
+    allocate(seed(seedsize))
+    seed = c
+    call random_seed(put=seed)
+    call random_number(m)
+  end subroutine
+  subroutine setRandomMatrixAllocated(p, ys, xs)
+    real(8), intent(out), pointer :: p(:, :)
+    real(8), allocatable, target :: m(:,:)
+    integer, intent(in) :: ys, xs
+    call allocRandomMatrix(m, ys, xs)
+    p => m
   end subroutine
   subroutine tic(t1)
     integer, intent(inout) :: t1
@@ -70,6 +98,20 @@ contains
       do x = 1, xs
         r(y, x) = sigmoid(m(y, x))
       end do 
+    end do    
+  end function
+  function sigmoid_v(v) result(r)
+    ! 新たにallocして返す。
+    real(8), intent(in) :: v(:)
+    !
+    integer :: i
+    integer :: s
+    real(8), allocatable :: r(:)
+    !
+    s = size(v)
+    allocate(r(s))
+    do i = 1, s
+        r(i) = sigmoid(v(i))
     end do    
   end function
   function softmax_m(m) result(r)
@@ -158,7 +200,34 @@ contains
         grad(y, x) = (fxh1 - fxh2) / (2 * h)
       end do
     end do
-    
   end subroutine
+  subroutine initWithTwoLayer(net, isize, hsize, osize)
+    type(network), allocatable, intent(out) :: net
+    integer, intent(in) :: isize, hsize, osize
+    allocate(net)
+    allocate(net%W(2))
+    allocate(net%b(2))
+    allocate(net%layerSize(3))
+
+    net%layerSize(1) = isize
+    net%layerSize(2) = hsize
+    net%layerSize(3) = osize
+ 
+    call setRandomMatrixAllocated(net%W(1)%p, isize, hsize)
+    call setRandomMatrixAllocated(net%b(1)%p, 1, hsize)
+    call setRandomMatrixAllocated(net%W(2)%p, hsize, osize)
+    call setRandomMatrixAllocated(net%b(2)%p, 1, osize)
+  end subroutine
+  function predictWithTwoLayer(net, x) result(y)
+    type(network), intent(in) :: net
+    real(8) :: x(:, :)
+    real(8) :: a1(1, net%layerSize(2))
+    real(8) :: a2(1, net%layerSize(3))
+    real(8) :: y(1, net%layerSize(3)) 
+    a1 = matmul(x, net%W(1)%p) + net%b(1)%p
+    a1 = sigmoid_m(a1)
+    a2 = matmul(a1, net%W(2)%p) + net%b(2)%p
+    y = softmax_m(a2)
+  end function
 end module
 
