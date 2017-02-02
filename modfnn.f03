@@ -162,13 +162,13 @@ contains
     rv = sum(r) * 0.5d0
     deallocate(r)
   end function
-  function cross_entropy_error(v, t) result(rv)
-    real(8), intent(in) :: v(:)
-    real(8), intent(in) :: t(:)
+  function cross_entropy_error(m, t) result(rv)
+    real(8), intent(in) :: m(:, :)
+    real(8), intent(in) :: t(:, :)
     !
     real(8) :: rv, delta = 1d-7
     !
-    rv = -sum(t * log(v + delta))
+    rv = -sum(t * log(m + delta)) / size(m, 1)
   end function
   subroutine numerical_gradient(f, m0, grad)
     interface
@@ -228,6 +228,16 @@ contains
     a1 = sigmoid_m(a1)
     a2 = matmul(a1, net%W(2)%p) + net%b(2)%p
     y = softmax_m(a2)
+  end function
+  function lossWithTwoLayer(net, x, t) result(v)
+    ! t is train data
+    type(network), intent(in) :: net
+    real(8) :: v
+    real(8) :: x(:, :)
+    real(8) :: t(:, :)
+    real(8) :: y(1, net%layerSize(3))
+    y = predictWithTwoLayer(net, x)
+    v = cross_entropy_error(y, t)
   end function
 end module
 

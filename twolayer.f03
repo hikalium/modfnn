@@ -6,10 +6,13 @@ program main
   type(network), allocatable :: net
   real(8), allocatable:: x(:, :)
 
+  type(matptr), allocatable :: labels(:)
+  type(matptr), allocatable :: imgs(:)
+
   call allocRandomMatrix(x, 1, 784)
 
+  call read_MNIST(1000, imgs, labels)
   call initWithTwoLayer(net, 784, 100, 10)
-  ! call read_MNIST(1000, imgs, labels)
   call disp(predictWithTwoLayer(net, x))
 
 contains
@@ -34,7 +37,7 @@ contains
     integer :: fp_img, fp_label
     integer :: x, y, i
     type(matptr), allocatable :: imgs(:)
-    integer, allocatable :: labels(:)
+    type(matptr), allocatable :: labels(:)
     allocate(imgs(n))
     allocate(labels(n))
     fp_img = 10
@@ -52,31 +55,33 @@ contains
     end do
     ! Read
     do i = 1, n
-      allocate(imgs(i)%p(28, 28))
-      do y = 1, 28
-        do x = 1, 28
-          imgs(i)%p(y, x) = read_uint8(fp_img)
-        end do
+      allocate(imgs(i)%p(1, 28 * 28))
+      do x = 1, 28*28
+          imgs(i)%p(1, x) = read_uint8(fp_img) / 255d0
       end do
-      labels(i) = read_uint8(fp_label)
-      call disp(labels(i))
+      allocate(labels(i)%p(1, 10))
+      labels(i)%p = 0
+      labels(i)%p(1, read_uint8(fp_label) + 1) = 1
+      call disp(labels(i)%p)
       call disp_MNISTimg(imgs(i)%p)
     end do
     close(fp_label)
     close(fp_img)
   end subroutine
-  subroutine disp_MNISTimg(m)
-    real(8) :: m(:, :)
+  subroutine disp_MNISTimg(m0)
+    real(8) :: m0(:, :)
+    real(8) :: m(28, 28)
     integer x, y
-    do y = 1, size(m, 1)
-      do x = 1, size(m, 2)
+    m = reshape(m0, (/28, 28/))
+    do x = 1, size(m, 2)
+      do y = 1, size(m, 1)
         if(m(y, x) .eq. 0) then
           write(*, fmt='(A2)', advance='no') " "
-        else if(m(y, x) < 16) then
+        else if(m(y, x) < 0.25d0) then
           write(*, fmt='(A2)', advance='no') "."
-        else if(m(y, x) < 32) then
+        else if(m(y, x) < 0.5d0) then
           write(*, fmt='(A2)', advance='no') ","
-        else if(m(y, x) < 64) then
+        else if(m(y, x) < 0.75d0) then
           write(*, fmt='(A2)', advance='no') "x"
         else 
           write(*, fmt='(A2)', advance='no') "#"
